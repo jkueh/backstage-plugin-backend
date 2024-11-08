@@ -47,5 +47,10 @@ export interface Config {
          * @deepVisibility secret
          */
         accounts?: PagerDutyAccountConfig[];
+
+        /**
+         * Optional setting to require the user-cookie authentication method
+         */
+        requireUserCookieAuthentication?: boolean
     };
 }

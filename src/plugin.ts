@@ -7,9 +7,9 @@ class CatalogFetchApi {
     constructor(
         private readonly logger: LoggerService,
         private readonly auth: AuthService,
-    ) {}
+    ) { }
 
-    async fetch(input: any, init: RequestInit | undefined) : Promise<Response>{
+    async fetch(input: any, init: RequestInit | undefined): Promise<Response> {
         const request = new Request(input as any, init);
         const { token } = await this.auth.getPluginRequestToken({
             onBehalfOf: await this.auth.getOwnServiceCredentials(),
@@ -30,17 +30,18 @@ export const pagerDutyPlugin = createBackendPlugin({
             deps: {
                 logger: coreServices.logger,
                 config: coreServices.rootConfig,
-                httpRouter: coreServices.httpRouter,  
-                database: coreServices.database, 
+                httpRouter: coreServices.httpRouter,
+                database: coreServices.database,
                 discovery: coreServices.discovery,
                 auth: coreServices.auth,
             },
             async init({ config, logger, httpRouter, database, discovery, auth }) {
 
-                const pagerDutyBackendStore : PagerDutyBackendStore = await PagerDutyBackendDatabase.create(
+                const pagerDutyBackendStore: PagerDutyBackendStore = await PagerDutyBackendDatabase.create(
                     await database.getClient(),
                     { skipMigrations: true },
                 );
+
 
                 httpRouter.use(
                     await createRouter({
@@ -55,9 +56,11 @@ export const pagerDutyPlugin = createBackendPlugin({
                         })
                     }),
                 );
+
+                const requireUserCookieAuthentication = config.getOptionalBoolean('pagerDuty.userCookieAuthentication');
                 httpRouter.addAuthPolicy({
                     path: '/',
-                    allow: 'unauthenticated',
+                    allow: requireUserCookieAuthentication ? 'user-cookie' : 'unauthenticated',
                 });
             },
         });
